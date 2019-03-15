@@ -96,10 +96,15 @@ server <- function(input, output, session) {
     browseURL(paste0(pre_fill_link, encoded_log))
   }
   
-  output$result <- reactive({
-    if (vans() == 0) {
-      paste("Waiting for your answer ...")
-    } else 
+  # Detect button for the answer
+  observeEvent(input$answer, {
+    # Detect click on answe button
+    vans(vans() + 1)  
+    
+    output$result <- reactive({
+      if (vans() == 0) {
+        paste("Waiting for your answer ...")
+      } else 
         if (vans() == 1) {
           CR <- matrix(as.numeric(strsplit(input$prodab,",")[[1]]), nrow = n1)
           fres <- (sum(abs(C-CR)) < 0.0001*n1*m2)
@@ -112,22 +117,12 @@ server <- function(input, output, session) {
           paste("Your answer is ", 
                 ifelse(fres, "NOW CORRECT. The clock will stop until
                 you submit your answer!", "STILL INCORRECT. Check out your response 
-                and verify your answer AGAIN!"), sep = "")
-        } else if (vans() == 3) {
-          CR <- matrix(as.numeric(strsplit(input$prodab,",")[[1]]), nrow = n1)
-          fres <- (sum(abs(C-CR)) < 0.0001*n1*m2)
-          paste(ifelse(fres, "Your answer is NOW CORRECT. The clock will stop 
-                until you submit your answer!", "INCORRECT. This is your last 
-                chance. Verify your answer again!"), sep = "")
-          } else {
-              paste("Sorry. Close this window and try again!")
-          }
-  })
-  
-  # Detect button for the answer
-  observeEvent(input$answer, {
-    # Detect click on answe button
-    vans(vans() + 1)  
+                and verify your answer again!"), sep = "")
+        } else {
+          paste("Sorry. Close this window and try again!")
+        }
+    })
+    
   })
   
   # Detect a submission
