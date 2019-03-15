@@ -31,7 +31,7 @@ ui <- fluidPage(
         hr(),
         textAreaInput("prodab", "Answer problem:", pans),
         actionButton("answer", "Verify answer"),
-        conditionalPanel(condition = "input.answer == 1",
+        conditionalPanel(condition = "input.answer >= 1",
             br(),
             actionButton("submit", "Submit to Google Form")
         )
@@ -88,7 +88,7 @@ server <- function(input, output, session) {
     # Link for the Google Form
     pre_fill_link <- 
       "https://docs.google.com/forms/d/e/1FAIpQLScjWdLBSYHvLdtgLivYc05qG0SexvGpaT1Wzvh9fRY8-oooMQ/viewform?usp=pp_url&entry.1963454833="
-        cptr <- "No response"
+    cptr <- "No response"
     try(cptr <- system("WMIC CSPRODUCT GET NAME", intern = TRUE)[2])
     uresults <- paste(fres - runif(1), qt, cptr, sep=",")
     uresults <- paste(uresults, paste(Sys.info(), collapse = ","), sep = ",")
@@ -100,15 +100,28 @@ server <- function(input, output, session) {
     if (vans() == 0) {
       paste("Waiting for your answer ...")
     } else 
-        if (vans() <= 3) {
+        if (vans() == 1) {
+          CR <- matrix(as.numeric(strsplit(input$prodab,",")[[1]]), nrow = n1)
+          fres <- (sum(abs(C-CR)) < 0.0001*n1*m2)
+          paste(ifelse(fres, "Your answer is CORRECT. The clock will stop 
+            until you submit your answer!", "Your answer is INCORRECT. Check 
+            out your response and verify your answer again!"), sep = "")
+        } else if (vans() == 2) {
           CR <- matrix(as.numeric(strsplit(input$prodab,",")[[1]]), nrow = n1)
           fres <- (sum(abs(C-CR)) < 0.0001*n1*m2)
           paste("Your answer is ", 
-            ifelse(fres, "CORRECT.", "INCORRECT."), " The clock will stop until
-            you submit your answer!", sep = "")
-        } else {
-          paste("Sorry. Close this window and try again!")
-        }
+                ifelse(fres, "NOW CORRECT. The clock will stop until
+                you submit your answer!", "STILL INCORRECT. Check out your response 
+                and verify your answer AGAIN!"), sep = "")
+        } else if (vans() == 3) {
+          CR <- matrix(as.numeric(strsplit(input$prodab,",")[[1]]), nrow = n1)
+          fres <- (sum(abs(C-CR)) < 0.0001*n1*m2)
+          paste(ifelse(fres, "Your answer is NOW CORRECT. The clock will stop 
+                until you submit your answer!", "INCORRECT. This is your last 
+                chance. Verify your answer again!"), sep = "")
+          } else {
+              paste("Sorry. Close this window and try again!")
+          }
   })
   
   # Detect button for the answer
