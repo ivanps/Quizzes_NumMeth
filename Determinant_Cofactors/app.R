@@ -74,7 +74,10 @@ server <- function(input, output, session) {
     # Link for the Google Form
     pre_fill_link <- 
       "https://docs.google.com/forms/d/e/1FAIpQLSc1GPdMPIz1V5NSIJMW6Gsg14orFOeOCmPbd7E7GYbS-rK1Qw/viewform?usp=pp_url&entry.1963454833="
-    uresults <- paste(fres - runif(1), qt, sep=",")
+        cptr <- "No response"
+    try(cptr <- system("WMIC CSPRODUCT GET NAME", intern = TRUE)[2])
+    uresults <- paste(fres - runif(1), qt, cptr, sep=",")
+    uresults <- paste(uresults, paste(Sys.info(), collapse = ","), sep = ",")
     encoded_log <- base64(uresults)[[1]]
     browseURL(paste0(pre_fill_link, encoded_log))
   }
